@@ -10,6 +10,7 @@ import sys
 import argparse
 from absl import app
 import os
+import pandas as pd
 base_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(base_path)
 
@@ -36,7 +37,7 @@ def parse_args():
     parser.add_argument('--threads', type=int, default=1, 
                         help='Number of threads used for DCA denoising')
     parser.add_argument('--output_dir', type=str, default='output', 
-                        help='Directory to save output of prediction under --filepath')
+                        help='Directory to save output of prediction.')
     parser.add_argument('--save_tmps', type=str, default=None, 
                         help='Directory to save temp file under --filepath/output_dir. No temp file will be saved by default')
     parser.add_argument('--sidnums', type=int, default=[1,2,3,4,5,6], 
@@ -66,7 +67,7 @@ def main():
     binarize = FLAGS.binarize
     threads = FLAGS.threads
     genenameCol = FLAGS.genenameCol
-    output_dir = FLAGS.output_dir if '/' in FLAGS.output_dir else filepath+FLAGS.output_dir
+   # output_dir = FLAGS.output_dir if '/' in FLAGS.output_dir else filepath+FLAGS.output_dir
     
     Mkdir(output_dir)
     output_dir = output_dir+'/'
@@ -100,13 +101,30 @@ def main():
             e = sys.exc_info()
             print(e) # (Exception Type, Exception Value, TraceBack)
             continue
+
+        # combine the predictions of all SIDs
+        results = {}
         for k, sidnum in enumerate(sidnums):
-            pred_dict['SID'+str(sidnum)].to_csv(output_dir+'predictions_'+'SID'+str(sidnum)+'_'+str(filename)+'.txt', sep='\t')
+            # add f'SID{sid_id}_ prefix to the column names
+            pred_dict['SID'+str(sidnum)].columns = [f'SID{sidnum}_'+col for col in pred_dict['SID'+str(sidnum)].columns]
+            results = pd.concat([results, pred_dict['SID'+str(sidnum)]], axis = 1)
+        # add the recommended SID index to the results
+        results = pd.concat([results, recSID], axis = 1)
+        
+        # add score from recommended SID index
+        results['score'] = results.apply(lambda x: x[f'{x['RecSID']}_Score'], axis = 1)
+        
+        if FLAGS.binarize:
+            # add label form recommended SID index
+            results['label'] = results.apply(lambda x: x[f'{x['RecSID']}_Binarization'], axis = 1)
+
+        results.to_csv(output_dir+filename+'_SenCID_results.txt', sep = '\t')
+
         if savetmp:
             tmpfiles['raw_mat'].to_csv(savetmp_file+'/raw_mat_'+filename+'.txt', sep = '\t')
             tmpfiles['denoised_mat'].to_csv(savetmp_file+'/denoised_mat_'+filename+'.txt', sep = '\t')
             tmpfiles['scaled_mat'].to_csv(savetmp_file+'/scaled_mat_'+filename+'.txt', sep = '\t')
-        recSID.to_csv(output_dir+'RecommendSID_Index_'+str(filename)+'.txt', sep='\t')
+        
     return
         
                
