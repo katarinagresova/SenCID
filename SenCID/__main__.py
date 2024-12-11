@@ -67,7 +67,7 @@ def main():
     binarize = FLAGS.binarize
     threads = FLAGS.threads
     genenameCol = FLAGS.genenameCol
-   # output_dir = FLAGS.output_dir if '/' in FLAGS.output_dir else filepath+FLAGS.output_dir
+    output_dir = FLAGS.output_dir
     
     Mkdir(output_dir)
     output_dir = output_dir+'/'
