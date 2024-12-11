@@ -112,11 +112,12 @@ def main():
         results = pd.concat([results, recSID], axis = 1)
         
         # add score from recommended SID index
-        results['score'] = results.apply(lambda x: x[f'{x['RecSID']}_Score'], axis = 1)
+        REC_COLUMN = 'RecSID'
+        results['score'] = results.apply(lambda x: x[f'{x[REC_COLUMN]}_Score'], axis = 1)
         
         if FLAGS.binarize:
             # add label form recommended SID index
-            results['label'] = results.apply(lambda x: x[f'{x['RecSID']}_Binarization'], axis = 1)
+            results['label'] = results.apply(lambda x: x[f'{x[REC_COLUMN]}_Binarization'], axis = 1)
 
         results.to_csv(output_dir+filename+'_SenCID_results.txt', sep = '\t')
 
