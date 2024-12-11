@@ -61,7 +61,7 @@ def main():
     from DataPro import GetFiles, MakeAdata
     from api import SenCID
 
-    filepath = FLAGS.filepath if FLAGS.filepath[-1]=='/' else FLAGS.filepath+'/'
+    filepath = FLAGS.filepath
     add_prefix = FLAGS.add_prefix
     denoising = FLAGS.denoising
     binarize = FLAGS.binarize
@@ -91,7 +91,7 @@ def main():
                                 add_prefix = add_prefix, 
                                 genenameCol = genenameCol)
         try:
-            pred_dict, recSID, tmpfiles = SenCID(adata = adata, 
+            pred_df, recSID, tmpfiles = SenCID(adata = adata, 
                                 sidnums = sidnums, 
                                 denoising = denoising, 
                                 binarize = binarize, 
@@ -102,14 +102,8 @@ def main():
             print(e) # (Exception Type, Exception Value, TraceBack)
             continue
 
-        # combine the predictions of all SIDs
-        results = {}
-        for k, sidnum in enumerate(sidnums):
-            # add f'SID{sid_id}_ prefix to the column names
-            pred_dict['SID'+str(sidnum)].columns = [f'SID{sidnum}_'+col for col in pred_dict['SID'+str(sidnum)].columns]
-            results = pd.concat([results, pred_dict['SID'+str(sidnum)]], axis = 1)
-        # add the recommended SID index to the results
-        results = pd.concat([results, recSID], axis = 1)
+        # combine prediction results with recommended SID index
+        results = pd.concat([pred_df, recSID], axis = 1)
         
         # add score from recommended SID index
         REC_COLUMN = 'RecSID'

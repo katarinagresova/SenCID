@@ -9,6 +9,7 @@ from absl import app
 #base_path = Path(__file__).parent
 import os
 import numpy as np
+import pandas as pd
 base_path = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(base_path)
 
@@ -56,10 +57,8 @@ def SenCID(adata, sidnums=[1,2,3,4,5,6], denoising = True, binarize = False, thr
     else:
         tmps = None
 
-    pred_list = [Pred(data_scaled, sidnum, binarize) for sidnum in sidnums]
-    sid_list = ['SID'+str(sidnum) for sidnum in sidnums]
-    pred_dict = dict(zip(sid_list, pred_list))
+    pred_df = pd.concat([Pred(data_scaled, sidnum, binarize) for sidnum in sidnums], axis = 1)
     recSID = Recommend(data_scaled)
     print('Finished. Giving SID scores and SID Recommendation...')
-    return pred_dict, recSID, tmps
+    return pred_df, recSID, tmps
 

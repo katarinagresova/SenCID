@@ -24,7 +24,7 @@ def Cpm_added(count, features):
     cpm_added = pd.concat([cpm, addmat])
     
     for i in cpm_added.columns:
-    	cpm_added.loc[:,i] = cpm_added.loc[:,i]/(sum(cpm_added.loc[:,i]))*(1e6)
+        cpm_added.loc[:,i] = cpm_added.loc[:,i]/(sum(cpm_added.loc[:,i]))*(1e6)
     cpm_added = cpm_added.loc[features,:]
     return cpm_added
 
@@ -34,12 +34,21 @@ def Zcol(cpm_added):
     cpm_log = np.log2(cpm_added+1)
     cpm_zcol = cpm_log
     for i in cpm_zcol.columns:
-    	cpm_zcol[[i]] = scaler.fit_transform(cpm_zcol[[i]])
+        cpm_zcol[[i]] = scaler.fit_transform(cpm_zcol[[i]])
     return cpm_zcol
 
 
 def GetFiles(filepath, fileclass):
-    if fileclass in ['h5', 'txt', 'csv', 'h5ad']:
+
+    # one input file
+    if filepath.endswith(fileclass):
+        files = [filepath]
+        filenames = [filepath.split('/')[-1].replace('.'+fileclass,'')]
+
+    # multiple files in a directory
+    elif fileclass in ['h5', 'txt', 'csv', 'h5ad']:
+        filepath += '/' if not filepath.endswith('/') else ''
+
         files = glob(filepath+r'*.'+fileclass)
         files = [c.replace('\\','/') for c in files]
         filenames = [c.split('/')[-1] for c in files]

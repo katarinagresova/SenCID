@@ -120,10 +120,10 @@ def Pred(cpm_zcol, sidnum, binarize = False):
     model_pretest = model_L.predict(x_test)
     if binarize: 
         labels = pd.concat([pd.DataFrame(Ltest_prob[:,1]), pd.DataFrame(model_decf), pd.DataFrame(model_pretest)], axis = 1)
-        labels.columns = ['SID_Score', 'Decision', 'Binarization']
+        labels.columns = [f'SID{sidnum}_Score', f'SID{sidnum}_Decision', f'SID{sidnum}_Binarization']
     else: 
         labels = pd.concat([pd.DataFrame(Ltest_prob[:,1]), pd.DataFrame(model_decf)], axis = 1)
-        labels.columns = ['SID_Score', 'Decision']
+        labels.columns = [f'SID{sidnum}_Score', f'SID{sidnum}_Decision']
     labels.index = x_test.index
     return labels
 
@@ -134,6 +134,6 @@ def Recommend(cpm_zcol):
     recommended = model_rec.predict(df_test)
     rec_decf = model_rec.decision_function(df_test)
     rec_labels = pd.concat([pd.DataFrame(recommended), pd.DataFrame(rec_decf)], axis = 1)
-    rec_labels.columns = ['RecSID', 'rec_SID1', 'rec_SID2', 'rec_SID3', 'rec_SID4', 'rec_SID5', 'rec_SID6']
+    rec_labels.columns = ['RecSID', 'SID1_rec', 'SID2_rec', 'SID3_rec', 'SID4_rec', 'SID5_rec', 'SID6_rec']
     rec_labels.index = df_test.index
     return rec_labels
